@@ -13,32 +13,57 @@ public class MyGUI extends JFrame {
     public MyGUI() {
         setTitle("Login / Registration Form");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
+        setResizable(true);
         setSize(400, 250); // Set the size of the frame
 
         // Load existing users from CSV database into memory
         usersMap = loadUsersFromCSV();
 
-        // Create a panel for login/registration with colorful background
-        JPanel panel = new JPanel(new GridLayout(4, 2, 10, 10)); // Increase the number of rows to accommodate more components
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        // Create a panel with GridBagLayout
+        JPanel contentPane = new JPanel(new GridBagLayout());
+        contentPane.setBackground(Color.PINK); // Set the background color to pink
+        setContentPane(contentPane);
+
+        // Create GridBagConstraints for center alignment
+        GridBagConstraints gbcCenter = new GridBagConstraints();
+        gbcCenter.gridwidth = GridBagConstraints.REMAINDER;
+        gbcCenter.insets = new Insets(10, 10, 10, 10);
+        gbcCenter.anchor = GridBagConstraints.CENTER;
+
+        // Registration heading
+        JLabel registrationLabel = new JLabel("Registration");
+        registrationLabel.setFont(new Font("Arial", Font.BOLD, 28));
+        registrationLabel.setForeground(Color.BLACK); // Change color to black
+        contentPane.add(registrationLabel, gbcCenter);
 
         // Username label and field
         JLabel usernameLabel = new JLabel("Username:");
         JTextField usernameField = new JTextField();
-        panel.add(usernameLabel);
-        panel.add(usernameField);
+        usernameField.setPreferredSize(new Dimension(200, 30)); // Set preferred size
+        GridBagConstraints gbcUsernameLabel = new GridBagConstraints();
+        gbcUsernameLabel.anchor = GridBagConstraints.EAST;
+        contentPane.add(usernameLabel, gbcUsernameLabel);
+        contentPane.add(usernameField, gbcCenter);
 
         // Password label and field
         JLabel passwordLabel = new JLabel("Password:");
         JPasswordField passwordField = new JPasswordField();
-        panel.add(passwordLabel);
-        panel.add(passwordField);
+        passwordField.setPreferredSize(new Dimension(200, 30)); // Set preferred size
+        GridBagConstraints gbcPasswordLabel = new GridBagConstraints();
+        gbcPasswordLabel.anchor = GridBagConstraints.EAST;
+        contentPane.add(passwordLabel, gbcPasswordLabel);
+        contentPane.add(passwordField, gbcCenter);
 
-        // Login button with colorful appearance
+        // Create GridBagConstraints for button alignment
+        GridBagConstraints gbcButtons = new GridBagConstraints();
+        gbcButtons.gridwidth = GridBagConstraints.REMAINDER;
+        gbcButtons.insets = new Insets(10, 10, 10, 10);
+        gbcButtons.anchor = GridBagConstraints.CENTER;
+
+        // Login button
         JButton loginButton = new JButton("Login");
-        loginButton.setBackground(Color.BLUE); // Set button color
-        loginButton.setForeground(Color.WHITE); // Set text color
+        loginButton.setBackground(new Color(0, 128, 255)); // Dark blue
+        loginButton.setForeground(Color.WHITE);
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -53,12 +78,11 @@ public class MyGUI extends JFrame {
                 }
             }
         });
-        panel.add(loginButton);
 
-        // Register button with colorful appearance
+        // Register button
         JButton registerButton = new JButton("Register");
-        registerButton.setBackground(Color.GREEN); // Set button color
-        registerButton.setForeground(Color.WHITE); // Set text color
+        registerButton.setBackground(new Color(34, 139, 34)); // Dark green
+        registerButton.setForeground(Color.WHITE);
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,9 +118,13 @@ public class MyGUI extends JFrame {
                 }
             }
         });
-        panel.add(registerButton);
 
-        add(panel);
+        // Add login and register buttons in the same line
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.add(loginButton);
+        buttonPanel.add(registerButton);
+        contentPane.add(buttonPanel, gbcButtons);
+
         setLocationRelativeTo(null); // Center the frame on the screen
     }
 
