@@ -101,7 +101,7 @@ public class GeneralDatabaseGUI extends JFrame {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] data = line.split(",", 2); // Split line into title and author
+                String[] data = parseCSVLine(line);
                 String title = (data.length > 0 && !data[0].trim().isEmpty()) ? data[0].trim() : "Unknown";
                 String author = (data.length > 1 && !data[1].trim().isEmpty()) ? data[1].trim() : "Unknown"; // Check if author is present
                 booksData.add(new String[]{title, author});
@@ -110,6 +110,24 @@ public class GeneralDatabaseGUI extends JFrame {
             e.printStackTrace();
         }
         return booksData;
+    }
+
+    private String[] parseCSVLine(String line) {
+        List<String> values = new ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder sb = new StringBuilder();
+        for (char c : line.toCharArray()) {
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            } else if (c == ',' && !inQuotes) {
+                values.add(sb.toString());
+                sb.setLength(0);
+            } else {
+                sb.append(c);
+            }
+        }
+        values.add(sb.toString());
+        return values.toArray(new String[0]);
     }
 
     private void updateTable(List<String[]> newData) {
