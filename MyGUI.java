@@ -75,12 +75,13 @@ public class MyGUI extends JFrame {
                     // Show welcome message and open the main page
                     JOptionPane.showMessageDialog(MyGUI.this, "Login successful! Welcome to the Book Management System!", "Success", JOptionPane.INFORMATION_MESSAGE);
                     openMainPage();
+                    // Close the login/registration page
+                    dispose();
                 } else {
                     JOptionPane.showMessageDialog(MyGUI.this, "Invalid username or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
-
         // Register button
         JButton registerButton = new JButton("Register");
         registerButton.setBackground(new Color(34, 139, 34)); // Dark green
@@ -135,7 +136,6 @@ public class MyGUI extends JFrame {
         JFrame mainPageFrame = new JFrame("Book Management System");
         mainPageFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainPageFrame.setSize(400, 200);
-    
         // Create a panel with GridBagLayout
         JPanel mainPagePanel = new JPanel(new GridBagLayout());
         mainPagePanel.setBackground(Color.PINK); // Set the background color to pink
@@ -143,7 +143,6 @@ public class MyGUI extends JFrame {
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.CENTER;
-    
         // Back button to return to previous page
         JButton backButton = new JButton("Back");
         backButton.addActionListener(new ActionListener() {
@@ -156,7 +155,6 @@ public class MyGUI extends JFrame {
         gbc.insets = new Insets(10, 10, 20, 10); // Adjusted insets for the "Back" button
         gbc.anchor = GridBagConstraints.WEST; // Align back button to the left
         mainPagePanel.add(backButton, gbc);
-    
         // Welcome message
         JLabel welcomeLabel = new JLabel("Welcome to the Book Management System!");
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
@@ -164,10 +162,8 @@ public class MyGUI extends JFrame {
         gbc.insets = new Insets(0, 10, 20, 10); // Adjusted insets for the "Welcome" title
         gbc.anchor = GridBagConstraints.CENTER; // Align welcome label to the center
         mainPagePanel.add(welcomeLabel, gbc);
-    
         // Create a panel for the buttons with FlowLayout to keep them in the same line
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-    
         // Button to open general database
         JButton generalDatabaseButton = new JButton("General Database");
         generalDatabaseButton.setBackground(new Color(0, 128, 255)); // Dark blue
@@ -181,7 +177,6 @@ public class MyGUI extends JFrame {
             }
         });
         buttonPanel.add(generalDatabaseButton);
-    
         // Button to open personal database
         JButton personalDatabaseButton = new JButton("Personal Database");
         personalDatabaseButton.setBackground(new Color(34, 139, 34)); // Dark green
@@ -194,18 +189,14 @@ public class MyGUI extends JFrame {
             }
         });
         buttonPanel.add(personalDatabaseButton);
-    
         gbc.gridy++; // Move to the next row
         gbc.insets = new Insets(10, 10, 10, 10); // Adjusted insets for button panel
         gbc.anchor = GridBagConstraints.CENTER; // Align button panel to the center
         mainPagePanel.add(buttonPanel, gbc);
-    
         mainPageFrame.add(mainPagePanel);
         mainPageFrame.setLocationRelativeTo(null);
         mainPageFrame.setVisible(true);
     }
-       
-
     private Map<String, String> loadUsersFromCSV() {
         Map<String, String> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
