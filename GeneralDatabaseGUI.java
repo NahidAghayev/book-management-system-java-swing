@@ -102,9 +102,13 @@ public class GeneralDatabaseGUI extends JFrame {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = parseCSVLine(line);
-                String title = (data.length > 0 && !data[0].trim().isEmpty()) ? data[0].trim() : "Unknown";
-                String author = (data.length > 1 && !data[1].trim().isEmpty()) ? data[1].trim() : "Unknown"; // Check if author is present
-                booksData.add(new String[]{title, author});
+                String[] titles = data[0].split(",\\s*"); // Split titles if comma-separated
+                for (String title : titles) {
+                    title = title.trim(); // Trim any leading or trailing spaces
+                    title = (title.isEmpty()) ? "Unknown" : title; // Use "Unknown" if title is empty
+                    String author = (data.length > 1 && !data[1].trim().isEmpty()) ? data[1].trim() : "Unknown"; // Check if author is present
+                    booksData.add(new String[]{title, author});
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
