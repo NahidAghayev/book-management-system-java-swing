@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -77,12 +78,18 @@ public class GeneralDatabaseGUI extends JFrame {
                 }
                 return super.getColumnClass(columnIndex);
             }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Disable editing for all cells
+            }
         };
 
         tableModel.addColumn("Title");
         tableModel.addColumn("Author");
         tableModel.addColumn("Rating");
         tableModel.addColumn("Reviews");
+        tableModel.addColumn("Add Book"); // Add "Add Book" column
 
         originalData = readBooksFromCSV(filePath);
         for (String[] bookData : originalData) {
@@ -90,10 +97,12 @@ public class GeneralDatabaseGUI extends JFrame {
             String author = bookData[1];
             String rating = "No rating";
             String reviews = "No review";
-            tableModel.addRow(new String[]{title, author, rating, reviews});
+            tableModel.addRow(new String[]{title, author, rating, reviews, "Add"}); // Add "Add" button for each book
         }
 
         bookTable.setModel(tableModel);
+        bookTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
+        bookTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox()));
     }
 
     private List<String[]> readBooksFromCSV(String filePath) {
@@ -138,6 +147,51 @@ public class GeneralDatabaseGUI extends JFrame {
         tableModel.setRowCount(0); // Clear existing rows
         for (String[] bookData : newData) {
             tableModel.addRow(bookData);
+        }
+    }
+
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "" : value.toString());
+            return this;
+        }
+    }
+
+    class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+
+        private String label;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                    // Perform the action you want when the button is clicked
+                    // For example, add the book to the cart or open a dialog for more details
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            return label;
         }
     }
 
