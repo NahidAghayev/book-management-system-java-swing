@@ -185,7 +185,8 @@ public class MyGUI extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Handle action for personal database button
-                JOptionPane.showMessageDialog(mainPageFrame, "Opening Personal Database...", "Information", JOptionPane.INFORMATION_MESSAGE);
+                mainPageFrame.dispose(); // Close the main page frame
+                new PersonalDatabaseGUI().setVisible(true); // Open the Personal Database GUI
             }
         });
         buttonPanel.add(personalDatabaseButton);
@@ -197,6 +198,7 @@ public class MyGUI extends JFrame {
         mainPageFrame.setLocationRelativeTo(null);
         mainPageFrame.setVisible(true);
     }
+
     private Map<String, String> loadUsersFromCSV() {
         Map<String, String> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
