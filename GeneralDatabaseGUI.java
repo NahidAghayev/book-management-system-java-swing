@@ -15,10 +15,14 @@ public class GeneralDatabaseGUI extends JFrame {
     private JTable bookTable;
     private JTextField searchField;
     private JButton searchButton;
+    private JButton backButton; // Added Back button
     private DefaultTableModel tableModel;
     private List<String[]> originalData;
+    private boolean isAdmin; // Field to store admin status
 
-    public GeneralDatabaseGUI() {
+    public GeneralDatabaseGUI(boolean isAdmin) {
+        this.isAdmin = isAdmin; // Initialize isAdmin field
+
         setTitle("General Database");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -26,11 +30,12 @@ public class GeneralDatabaseGUI extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        // Create a table to display book data
-        bookTable = new JTable();
-        bookTable.setAutoCreateRowSorter(true);
-        JScrollPane scrollPane = new JScrollPane(bookTable);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        // Create a panel to hold Back button and search panel
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+
+        // Added Back button
+        backButton = new JButton("Back");
+        buttonPanel.add(backButton, BorderLayout.WEST); // Add the Back button to the WEST position
 
         // Create search functionality
         JPanel searchPanel = new JPanel();
@@ -38,7 +43,14 @@ public class GeneralDatabaseGUI extends JFrame {
         searchButton = new JButton("Search");
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
-        mainPanel.add(searchPanel, BorderLayout.NORTH);
+        buttonPanel.add(searchPanel, BorderLayout.CENTER); // Add search panel to the CENTER position
+        mainPanel.add(buttonPanel, BorderLayout.NORTH); // Add button panel to the NORTH position
+
+        // Create a table to display book data
+        bookTable = new JTable();
+        bookTable.setAutoCreateRowSorter(true);
+        JScrollPane scrollPane = new JScrollPane(bookTable);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Populate the table with data from CSV file
         populateTableFromCSV("brodsky.csv");
@@ -62,6 +74,15 @@ public class GeneralDatabaseGUI extends JFrame {
                 } else {
                     updateTable(originalData);
                 }
+            }
+        });
+
+        // Added action listener for Back button to dispose the current frame
+        backButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                new TransitionPage(isAdmin); // Pass isAdmin to TransitionPage constructor
             }
         });
 
@@ -196,6 +217,6 @@ public class GeneralDatabaseGUI extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new GeneralDatabaseGUI());
+        SwingUtilities.invokeLater(() -> new GeneralDatabaseGUI(false));
     }
 }

@@ -8,7 +8,10 @@ import java.util.Map;
 
 public class MyGUI extends JFrame {
     private static final String DATABASE_FILE = "users.csv";
-    private Map<String, String> usersMap; // Map to store usernames and passwords
+    private static final String ADMIN_USERNAME = "admin";
+    private static final String ADMIN_PASSWORD = "admin";
+
+    private Map<String, User> usersMap; // Map to store usernames and User objects
 
     public MyGUI() {
         setTitle("Login / Registration Form");
@@ -18,6 +21,9 @@ public class MyGUI extends JFrame {
 
         // Load existing users from CSV database into memory
         usersMap = loadUsersFromCSV();
+
+        // Add admin credentials to the map
+        usersMap.put(ADMIN_USERNAME, new User(ADMIN_USERNAME, ADMIN_PASSWORD, true));
 
         // Create a panel with GridBagLayout
         JPanel contentPane = new JPanel(new GridBagLayout());
@@ -71,17 +77,22 @@ public class MyGUI extends JFrame {
                 String password = new String(passwordField.getPassword());
 
                 // Validate login credentials
-                if (usersMap.containsKey(username) && usersMap.get(username).equals(password)) {
-                    // Show welcome message and open the main page
-                    JOptionPane.showMessageDialog(MyGUI.this, "Login successful! Welcome to the Book Management System!", "Success", JOptionPane.INFORMATION_MESSAGE);
-                    openMainPage();
-                    // Close the login/registration page
-                    dispose();
+                if (usersMap.containsKey(username)) {
+                    User user = usersMap.get(username);
+                    if (user.verifyPassword(password)) {
+                        // Show welcome message and open the main page
+                        new TransitionPage(user.isAdmin());
+                        // Close the login/registration page
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(MyGUI.this, "Invalid username or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(MyGUI.this, "Invalid username or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+
         // Register button
         JButton registerButton = new JButton("Register");
         registerButton.setBackground(new Color(34, 139, 34)); // Dark green
@@ -111,7 +122,8 @@ public class MyGUI extends JFrame {
                     }
 
                     // Add new user to the map and update CSV file
-                    usersMap.put(username, password);
+                    User newUser = new User(username, password, false);
+                    usersMap.put(username, newUser);
                     saveUsersToCSV();
                     JOptionPane.showMessageDialog(MyGUI.this, "Registration successful. You can now login.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
@@ -131,84 +143,17 @@ public class MyGUI extends JFrame {
         setLocationRelativeTo(null); // Center the frame on the screen
     }
 
-    private void openMainPage() {
-        // Create a new frame for the main page
-        JFrame mainPageFrame = new JFrame("Book Management System");
-        mainPageFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainPageFrame.setSize(400, 200);
-        // Create a panel with GridBagLayout
-        JPanel mainPagePanel = new JPanel(new GridBagLayout());
-        mainPagePanel.setBackground(Color.PINK); // Set the background color to pink
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.CENTER;
-        // Back button to return to previous page
-        JButton backButton = new JButton("Back");
-        backButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                mainPageFrame.dispose(); // Close the main page frame
-                setVisible(true); // Show the login/registration form again
-            }
-        });
-        gbc.insets = new Insets(10, 10, 20, 10); // Adjusted insets for the "Back" button
-        gbc.anchor = GridBagConstraints.WEST; // Align back button to the left
-        mainPagePanel.add(backButton, gbc);
-        // Welcome message
-        JLabel welcomeLabel = new JLabel("Welcome to the Book Management System!");
-        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.gridy++; // Move to the next row
-        gbc.insets = new Insets(0, 10, 20, 10); // Adjusted insets for the "Welcome" title
-        gbc.anchor = GridBagConstraints.CENTER; // Align welcome label to the center
-        mainPagePanel.add(welcomeLabel, gbc);
-        // Create a panel for the buttons with FlowLayout to keep them in the same line
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        // Button to open general database
-        JButton generalDatabaseButton = new JButton("General Database");
-        generalDatabaseButton.setBackground(new Color(0, 128, 255)); // Dark blue
-        generalDatabaseButton.setForeground(Color.WHITE);
-        generalDatabaseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Handle action for general database button
-                mainPageFrame.dispose(); // Close the main page frame
-                new GeneralDatabaseGUI(); // Open the General Database GUI
-            }
-        });
-        buttonPanel.add(generalDatabaseButton);
-        // Button to open personal database
-        JButton personalDatabaseButton = new JButton("Personal Database");
-        personalDatabaseButton.setBackground(new Color(34, 139, 34)); // Dark green
-        personalDatabaseButton.setForeground(Color.WHITE);
-        personalDatabaseButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Handle action for personal database button
-                mainPageFrame.dispose(); // Close the main page frame
-                new PersonalDatabaseGUI().setVisible(true); // Open the Personal Database GUI
-            }
-        });
-        buttonPanel.add(personalDatabaseButton);
-        gbc.gridy++; // Move to the next row
-        gbc.insets = new Insets(10, 10, 10, 10); // Adjusted insets for button panel
-        gbc.anchor = GridBagConstraints.CENTER; // Align button panel to the center
-        mainPagePanel.add(buttonPanel, gbc);
-        mainPageFrame.add(mainPagePanel);
-        mainPageFrame.setLocationRelativeTo(null);
-        mainPageFrame.setVisible(true);
-    }
-
-    private Map<String, String> loadUsersFromCSV() {
-        Map<String, String> map = new HashMap<>();
+    private Map<String, User> loadUsersFromCSV() {
+        Map<String, User> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
             String line;
             // Read CSV file line by line
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
-                if (parts.length == 2) {
-                    // Store username and password in map
-                    map.put(parts[0], parts[1]);
+                if (parts.length == 3) {
+                    // Store username, password, and admin status in map
+                    boolean isAdmin = Boolean.parseBoolean(parts[2]);
+                    map.put(parts[0], new User(parts[0], parts[1], isAdmin));
                 }
             }
         } catch (FileNotFoundException e) {
@@ -224,8 +169,9 @@ public class MyGUI extends JFrame {
     private void saveUsersToCSV() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(DATABASE_FILE))) {
             // Write usersMap to CSV file
-            for (Map.Entry<String, String> entry : usersMap.entrySet()) {
-                bw.write(entry.getKey() + "," + entry.getValue());
+            for (Map.Entry<String, User> entry : usersMap.entrySet()) {
+                User user = entry.getValue();
+                bw.write(user.getUsername() + "," + user.getPassword() + "," + user.isAdmin());
                 bw.newLine();
             }
         } catch (IOException e) {
