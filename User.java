@@ -19,6 +19,10 @@ public class User {
         this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     // For security reasons, we won't expose getPassword()
     // Instead, we can implement a method to verify the password
     public boolean verifyPassword(String password) {
