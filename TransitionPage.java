@@ -64,7 +64,7 @@ public class TransitionPage extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     dispose(); // Close the current frame
-                    new PersonalDatabaseGUI().setVisible(true); // Open the Personal Database GUI
+                    new PersonalDatabase().setVisible(true); // Open the Personal Database GUI
                 }
             });
             buttonPanel.add(personalDatabaseButton);

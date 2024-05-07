@@ -8,7 +8,7 @@ import java.util.Vector;
 public class PersonalDatabase extends JFrame {
     private JTable table;
     private DefaultTableModel model;
-    private JTextField txtTitle, txtAuthor, txtUserRating, txtUserReview;
+    private JTextField txtTitle, txtAuthor,txtRating,txtReviews, txtUserRating, txtUserReview;
     private JComboBox<String> cbStatus;
     private JButton btnAdd, btnUpdate, btnDelete;
 
@@ -58,7 +58,7 @@ public class PersonalDatabase extends JFrame {
     }
 
     private void createTable() {
-        String[] columnNames = {"Title", "Author", "Status", "Time Spent", "Start Date", "End Date", "User Rating", "User Review"};
+        String[] columnNames = {"Title", "Author","Rating", "Reviews", "Status", "Time Spent", "Start Date", "End Date", "User Rating", "User Review"};
         model = new DefaultTableModel(columnNames, 0);
         table = new JTable(model);
     }
@@ -73,6 +73,14 @@ public class PersonalDatabase extends JFrame {
         formPanel.add(new JLabel("Author:"));
         txtAuthor = new JTextField(20);
         formPanel.add(txtAuthor);
+
+        formPanel.add(new JLabel("Rating:"));
+        txtRating = new JTextField(20);
+        formPanel.add(txtRating);
+
+        formPanel.add(new JLabel("Reviews:"));
+        txtReviews = new JTextField(20);
+        formPanel.add(txtReviews);
 
         formPanel.add(new JLabel("Status:"));
         cbStatus = new JComboBox<>(new String[]{"Not Started", "Ongoing", "Completed"});
@@ -108,7 +116,9 @@ public class PersonalDatabase extends JFrame {
         if (selectedRow >= 0) {
             model.setValueAt(txtTitle.getText(), selectedRow, 0);
             model.setValueAt(txtAuthor.getText(), selectedRow, 1);
-            model.setValueAt(cbStatus.getSelectedItem().toString(), selectedRow, 2);
+            model.setValueAt(txtRating.getText(), selectedRow, 2);
+            model.setValueAt(txtReviews.getText(), selectedRow, 3);
+            model.setValueAt(cbStatus.getSelectedItem().toString(), selectedRow, 4);
             model.setValueAt(txtUserRating.getText(), selectedRow, 6);
             model.setValueAt(txtUserReview.getText(), selectedRow, 7);
             clearForm();
