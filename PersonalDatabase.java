@@ -2,15 +2,16 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Vector;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PersonalDatabase extends JFrame {
     private JTable table;
     private DefaultTableModel model;
-    private JTextField txtTitle, txtAuthor,txtRating,txtReviews, txtUserRating, txtUserReview;
+    private JTextField txtTitle, txtAuthor, txtRating, txtReviews, txtUserRating, txtUserReview, txtTimeSpent, txtStartDate, txtEndDate;
     private JComboBox<String> cbStatus;
     private JButton btnAdd, btnUpdate, btnDelete;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
 
     public PersonalDatabase() {
         super("Personal Book Management System");
@@ -22,26 +23,9 @@ public class PersonalDatabase extends JFrame {
         btnUpdate = new JButton("Update Selected Book");
         btnDelete = new JButton("Delete Selected Book");
 
-        btnAdd.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addBook();
-            }
-        });
-
-        btnUpdate.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                updateBook();
-            }
-        });
-
-        btnDelete.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                deleteBook();
-            }
-        });
+        btnAdd.addActionListener(e -> addBook());
+        btnUpdate.addActionListener(e -> updateBook());
+        btnDelete.addActionListener(e -> deleteBook());
 
         JPanel inputPanel = new JPanel();
         inputPanel.add(btnAdd);
@@ -53,18 +37,23 @@ public class PersonalDatabase extends JFrame {
         this.add(inputPanel, BorderLayout.SOUTH);
 
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setSize(800, 400);
+        this.setSize(1000, 500);
         this.setVisible(true);
     }
 
     private void createTable() {
-        String[] columnNames = {"Title", "Author","Rating", "Reviews", "Status", "Time Spent", "Start Date", "End Date", "User Rating", "User Review"};
-        model = new DefaultTableModel(columnNames, 0);
+        String[] columnNames = {"Title", "Author", "Rating", "Reviews", "Status", "Time Spent", "Start Date", "End Date", "User Rating", "User Review"};
+        model = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // To prevent user from editing the cells directly in the table
+            }
+        };
         table = new JTable(model);
     }
 
     private void createForm() {
-        JPanel formPanel = new JPanel(new GridLayout(8, 2));
+        JPanel formPanel = new JPanel(new GridLayout(10, 2, 10, 10));
 
         formPanel.add(new JLabel("Title:"));
         txtTitle = new JTextField(20);
@@ -86,6 +75,18 @@ public class PersonalDatabase extends JFrame {
         cbStatus = new JComboBox<>(new String[]{"Not Started", "Ongoing", "Completed"});
         formPanel.add(cbStatus);
 
+        formPanel.add(new JLabel("Time Spent (minutes):"));
+        txtTimeSpent = new JTextField(20);
+        formPanel.add(txtTimeSpent);
+
+        formPanel.add(new JLabel("Start Date (dd/mm/yyyy):"));
+        txtStartDate = new JTextField(20);
+        formPanel.add(txtStartDate);
+
+        formPanel.add(new JLabel("End Date (dd/mm/yyyy):"));
+        txtEndDate = new JTextField(20);
+        formPanel.add(txtEndDate);
+
         formPanel.add(new JLabel("User Rating:"));
         txtUserRating = new JTextField(20);
         formPanel.add(txtUserRating);
@@ -98,30 +99,43 @@ public class PersonalDatabase extends JFrame {
     }
 
     private void addBook() {
-        model.addRow(new Object[]{
-            txtTitle.getText(),
-            txtAuthor.getText(),
-            cbStatus.getSelectedItem().toString(),
-            "", // Time spent
-            "", // Start date
-            "", // End date
-            txtUserRating.getText(),
-            txtUserReview.getText()
-        });
-        clearForm();
+        try {
+            model.addRow(new Object[]{
+                txtTitle.getText(),
+                txtAuthor.getText(),
+                txtRating.getText(),
+                txtReviews.getText(),
+                cbStatus.getSelectedItem().toString(),
+                txtTimeSpent.getText(),
+                dateFormat.format(dateFormat.parse(txtStartDate.getText())),
+                dateFormat.format(dateFormat.parse(txtEndDate.getText())),
+                txtUserRating.getText(),
+                txtUserReview.getText()
+            });
+            clearForm();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error in date format or other fields: " + e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void updateBook() {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
-            model.setValueAt(txtTitle.getText(), selectedRow, 0);
-            model.setValueAt(txtAuthor.getText(), selectedRow, 1);
-            model.setValueAt(txtRating.getText(), selectedRow, 2);
-            model.setValueAt(txtReviews.getText(), selectedRow, 3);
-            model.setValueAt(cbStatus.getSelectedItem().toString(), selectedRow, 4);
-            model.setValueAt(txtUserRating.getText(), selectedRow, 6);
-            model.setValueAt(txtUserReview.getText(), selectedRow, 7);
-            clearForm();
+            try {
+                model.setValueAt(txtTitle.getText(), selectedRow, 0);
+                model.setValueAt(txtAuthor.getText(), selectedRow, 1);
+                model.setValueAt(txtRating.getText(), selectedRow, 2);
+                model.setValueAt(txtReviews.getText(), selectedRow, 3);
+                model.setValueAt(cbStatus.getSelectedItem().toString(), selectedRow, 4);
+                model.setValueAt(txtTimeSpent.getText(), selectedRow, 5);
+                model.setValueAt(dateFormat.format(dateFormat.parse(txtStartDate.getText())), selectedRow, 6);
+                model.setValueAt(dateFormat.format(dateFormat.parse(txtEndDate.getText())), selectedRow, 7);
+                model.setValueAt(txtUserRating.getText(), selectedRow, 8);
+                model.setValueAt(txtUserReview.getText(), selectedRow, 9);
+                clearForm();
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error in date format or other fields: " + e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
@@ -135,7 +149,12 @@ public class PersonalDatabase extends JFrame {
     private void clearForm() {
         txtTitle.setText("");
         txtAuthor.setText("");
+        txtRating.setText("");
+        txtReviews.setText("");
         cbStatus.setSelectedIndex(0);
+        txtTimeSpent.setText("");
+        txtStartDate.setText("");
+        txtEndDate.setText("");
         txtUserRating.setText("");
         txtUserReview.setText("");
     }
@@ -143,6 +162,4 @@ public class PersonalDatabase extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new PersonalDatabase().setVisible(true));
     }
-    }
-
-
+}
