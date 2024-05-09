@@ -1,6 +1,5 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,13 +14,14 @@ public class GeneralDatabaseGUI extends JFrame {
     private JTable bookTable;
     private JTextField searchField;
     private JButton searchButton;
-    private JButton backButton; // Added Back button
+    private JButton backButton;
+    private JButton addButton;
     private DefaultTableModel tableModel;
     private List<String[]> originalData;
-    private boolean isAdmin; // Field to store admin status
+    private boolean isAdmin;
 
     public GeneralDatabaseGUI(boolean isAdmin) {
-        this.isAdmin = isAdmin; // Initialize isAdmin field
+        this.isAdmin = isAdmin;
 
         setTitle("General Database");
         setSize(800, 600);
@@ -30,32 +30,30 @@ public class GeneralDatabaseGUI extends JFrame {
         mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
 
-        // Create a panel to hold Back button and search panel
-        JPanel buttonPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-        // Added Back button
         backButton = new JButton("Back");
-        buttonPanel.add(backButton, BorderLayout.WEST); // Add the Back button to the WEST position
+        buttonPanel.add(backButton);
 
-        // Create search functionality
         JPanel searchPanel = new JPanel();
         searchField = new JTextField(20);
         searchButton = new JButton("Search");
         searchPanel.add(searchField);
         searchPanel.add(searchButton);
-        buttonPanel.add(searchPanel, BorderLayout.CENTER); // Add search panel to the CENTER position
-        mainPanel.add(buttonPanel, BorderLayout.NORTH); // Add button panel to the NORTH position
+        buttonPanel.add(searchPanel);
 
-        // Create a table to display book data
+        addButton = new JButton("Add");
+        buttonPanel.add(addButton);
+
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
+
         bookTable = new JTable();
         bookTable.setAutoCreateRowSorter(true);
         JScrollPane scrollPane = new JScrollPane(bookTable);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Populate the table with data from CSV file
         populateTableFromCSV("brodsky.csv");
 
-        // Add action listener for search button
         searchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -77,12 +75,30 @@ public class GeneralDatabaseGUI extends JFrame {
             }
         });
 
-        // Added action listener for Back button to dispose the current frame
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int[] selectedRows = bookTable.getSelectedRows();
+                List<String[]> selectedBooks = new ArrayList<>();
+                for (int viewRow : selectedRows) {
+                    int modelRow = bookTable.convertRowIndexToModel(viewRow);
+                    String title = (String) tableModel.getValueAt(modelRow, 0);
+                    String author = (String) tableModel.getValueAt(modelRow, 1);
+                    String rating = (String) tableModel.getValueAt(modelRow, 2);
+                    String reviews = (String) tableModel.getValueAt(modelRow, 3);
+                    selectedBooks.add(new String[]{title, author, rating, reviews});
+                }
+
+                // New logic for adding selected books
+                addToLibrary(selectedBooks);
+            }
+        });
+
         backButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 dispose();
-                new TransitionPage(isAdmin); // Pass isAdmin to TransitionPage constructor
+                new TransitionPage(isAdmin);
             }
         });
 
@@ -94,7 +110,9 @@ public class GeneralDatabaseGUI extends JFrame {
         tableModel = new DefaultTableModel() {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 2 || columnIndex == 3) {
+                if (columnIndex == getColumnCount() - 1) {
+                    return Boolean.class;
+                } else if (columnIndex == 2 || columnIndex == 3) {
                     return Integer.class;
                 }
                 return super.getColumnClass(columnIndex);
@@ -102,7 +120,7 @@ public class GeneralDatabaseGUI extends JFrame {
 
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Disable editing for all cells
+                return column == getColumnCount() - 1;
             }
         };
 
@@ -110,7 +128,7 @@ public class GeneralDatabaseGUI extends JFrame {
         tableModel.addColumn("Author");
         tableModel.addColumn("Rating");
         tableModel.addColumn("Reviews");
-        tableModel.addColumn("Add Book"); // Add "Add Book" column
+        tableModel.addColumn("Selected Books");
 
         originalData = readBooksFromCSV(filePath);
         for (String[] bookData : originalData) {
@@ -118,12 +136,10 @@ public class GeneralDatabaseGUI extends JFrame {
             String author = bookData[1];
             String rating = "No rating";
             String reviews = "No review";
-            tableModel.addRow(new String[]{title, author, rating, reviews, "Add"}); // Add "Add" button for each book
+            tableModel.addRow(new Object[]{title, author, rating, reviews, false});
         }
 
         bookTable.setModel(tableModel);
-        bookTable.getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
-        bookTable.getColumnModel().getColumn(4).setCellEditor(new ButtonEditor(new JCheckBox()));
     }
 
     private List<String[]> readBooksFromCSV(String filePath) {
@@ -132,11 +148,11 @@ public class GeneralDatabaseGUI extends JFrame {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = parseCSVLine(line);
-                String[] titles = data[0].split(",\\s*"); // Split titles if comma-separated
+                String[] titles = data[0].split(",\\s*");
                 for (String title : titles) {
-                    title = title.trim(); // Trim any leading or trailing spaces
-                    title = (title.isEmpty()) ? "Unknown" : title; // Use "Unknown" if title is empty
-                    String author = (data.length > 1 && !data[1].trim().isEmpty()) ? data[1].trim() : "Unknown"; // Check if author is present
+                    title = title.trim();
+                    title = (title.isEmpty()) ? "Unknown" : title;
+                    String author = (data.length > 1 && !data[1].trim().isEmpty()) ? data[1].trim() : "Unknown";
                     booksData.add(new String[]{title, author});
                 }
             }
@@ -165,54 +181,20 @@ public class GeneralDatabaseGUI extends JFrame {
     }
 
     private void updateTable(List<String[]> newData) {
-        tableModel.setRowCount(0); // Clear existing rows
+        tableModel.setRowCount(0);
         for (String[] bookData : newData) {
-            tableModel.addRow(bookData);
+            tableModel.addRow(new Object[]{bookData[0], bookData[1], "No rating", "No review", false});
         }
     }
 
-    class ButtonRenderer extends JButton implements TableCellRenderer {
-
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            setText((value == null) ? "" : value.toString());
-            return this;
-        }
-    }
-
-    class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
-
-        private String label;
-
-        public ButtonEditor(JCheckBox checkBox) {
-            super(checkBox);
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                    // Perform the action you want when the button is clicked
-                    // For example, add the book to the cart or open a dialog for more details
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-            label = (value == null) ? "" : value.toString();
-            button.setText(label);
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            return label;
+    private void addToLibrary(List<String[]> selectedBooks) {
+        if (PersonalDatabaseGUI.instance != null) {
+            PersonalDatabaseGUI.instance.addSelectedBooks(selectedBooks);
+            PersonalDatabaseGUI.instance.setVisible(true);
+        } else {
+            PersonalDatabaseGUI.instance = new PersonalDatabaseGUI("username", false);
+            PersonalDatabaseGUI.instance.addSelectedBooks(selectedBooks);
+            PersonalDatabaseGUI.instance.setVisible(true);
         }
     }
 

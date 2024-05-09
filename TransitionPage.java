@@ -5,9 +5,11 @@ import java.awt.event.ActionListener;
 
 public class TransitionPage extends JFrame {
     private boolean isAdmin;
+    private String username;
 
     public TransitionPage(boolean isAdmin) {
         this.isAdmin = isAdmin;
+        this.username=username;
         setTitle("Book Management System");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
@@ -64,7 +66,7 @@ public class TransitionPage extends JFrame {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     dispose(); // Close the current frame
-                    new PersonalDatabaseGUI().setVisible(true); // Open the Personal Database GUI
+                    new PersonalDatabaseGUI(username,isAdmin).setVisible(true); // Open the Personal Database GUI
                 }
             });
             buttonPanel.add(personalDatabaseButton);
