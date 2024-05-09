@@ -80,8 +80,13 @@ public class MyGUI extends JFrame {
                 if (usersMap.containsKey(username)) {
                     User user = usersMap.get(username);
                     if (user.verifyPassword(password)) {
-                        // Show welcome message and open the main page
-                        new TransitionPage(user.isAdmin());
+                        if (user.isAdmin()) {
+                            // Open the ShowBooksAdmin page for admin user
+                            new GeneralDatabaseOfAdmin().setVisible(true);
+                        } else {
+                            // Open the ShowBooks page for non-admin user
+                            new GeneralDatabaseGUI(username).setVisible(true);
+                        }
                         // Close the login/registration page
                         dispose();
                     } else {
