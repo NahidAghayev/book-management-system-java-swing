@@ -201,7 +201,7 @@ FilterAndSortFunction.SortSelected(bookTable);
      */
     private void readDataFromCSV() {
         allBooks = new ArrayList<>();
-        String csvFile = "brodsky.csv";
+        String csvFile = "copy.csv";
         try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(csvFile), "UTF-8"))) {
             String line;
             while ((line = br.readLine()) != null) {

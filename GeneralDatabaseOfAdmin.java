@@ -78,22 +78,6 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         searchPanel.setBackground(Color.PINK); // Set background color to pink
 
-        // Search field
-        searchField = new JTextField(20);
-        searchField.setToolTipText("Enter title or author to search");
-        searchPanel.add(searchField);
-
-        // Search button
-        JButton searchButton = new JButton("Search");
-        searchButton.setBackground(new Color(34, 139, 34)); // Dark green
-        searchButton.setForeground(Color.WHITE);
-        searchButton.addActionListener(e -> {
-            String query = searchField.getText().trim().toLowerCase();
-            filterBooks(query);
-        });
-
-        searchPanel.add(searchButton);
-
         // Add search panel to NORTH of the frame
         headerPanel.add(searchPanel, BorderLayout.EAST);
 
@@ -198,7 +182,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
 
     /** Method to save titles to CSV */
     private void saveTitlesToCSV() {
-        String csvFile = "brodsky.csv";
+        String csvFile = "copy.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
             for (String[] book : allBooks) {
                 writer.write(String.join(",", book) + "\n");
@@ -213,7 +197,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
     /** Load titles from CSV file */
     private void loadTitles() {
         allBooks = new ArrayList<>();
-        String csvFile = "brodsky.csv";
+        String csvFile = "copy.csv";
         try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
             String line;
             while ((line = br.readLine()) != null) {
