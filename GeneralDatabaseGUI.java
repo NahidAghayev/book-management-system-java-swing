@@ -5,6 +5,11 @@ import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 
+/** 
+ * This class creates a GUI for managing a general database of books where users can search,
+ * view, and select books to add to their personal library.
+ */
+
 public class GeneralDatabaseGUI extends JFrame {
 
     private DefaultTableModel tableModel;
@@ -12,7 +17,11 @@ public class GeneralDatabaseGUI extends JFrame {
     private ArrayList<String[]> allBooks;
     private ArrayList<String[]> selectedBooks = new ArrayList<>();
 
-    // Constructor
+    /**
+     * Constructor to initialize the General Database GUI.
+     * @param username the username of the user accessing this database.
+     */
+
     public GeneralDatabaseGUI(String username) {
         setTitle("Book Management System");
         setSize(800, 600);
@@ -172,7 +181,8 @@ public class GeneralDatabaseGUI extends JFrame {
         add(scrollPane, BorderLayout.CENTER);
 
         // Add "Add to Library" button
-        JButton addToLibraryButton = new JButton("Add to Library");
+        JButton addToLibraryButton = new JButton("Add to Personal Library");
+        addToLibraryButton.setBackground(Color.PINK);
         addToLibraryButton.addActionListener(e -> addToLibrary(username));
         add(addToLibraryButton, BorderLayout.SOUTH);
 dispose();
@@ -185,7 +195,10 @@ FilterAndSortFunction.SortSelected(bookTable);
         // Save data to general CSV
         saveDataToGeneralCSV();
     }
-
+    /** 
+     * Reads data from a CSV file to populate the book table.
+     * Handles complexities such as titles enclosed in quotes or titles with embedded commas.
+     */
 
     private void readDataFromCSV() {
         allBooks = new ArrayList<>();

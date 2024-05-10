@@ -5,6 +5,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 
+/** Main class for the Admin panel managing general database, users, and user reviews */
 public class GeneralDatabaseOfAdmin extends JFrame {
     private DefaultTableModel tableModel;
     private DefaultTableModel titlesTableModel;
@@ -14,6 +15,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
     private ArrayList<String[]> allUsers;
     private ArrayList<String[]> allReviews;
 
+    /** Constructor to initialize the GUI components */
     public GeneralDatabaseOfAdmin() {
         setTitle("Admin Panel");
         setSize(800, 600);
@@ -25,7 +27,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
 
         JPanel titlesPanel = new JPanel(new BorderLayout());
         titlesPanel.setBackground(Color.PINK);
-        tabbedPane.addTab("Titles", titlesPanel);
+        tabbedPane.addTab("Books", titlesPanel);
         createTitlesPanel(titlesPanel);
 
         // Users tab
@@ -36,7 +38,6 @@ public class GeneralDatabaseOfAdmin extends JFrame {
 
         JPanel reviewsPanel = new JPanel(new BorderLayout());
         reviewsPanel.setBackground(Color.PINK);
-
         tabbedPane.addTab("User Reviews", reviewsPanel);
         createUserReviewsPanel(reviewsPanel);
 
@@ -46,7 +47,6 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         // Header panel with BorderLayout
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.PINK); // Set background color to pink
-
 
         // Header label
         JLabel headerLabel = new JLabel("Book Management System");
@@ -64,60 +64,58 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         backButton.addActionListener(e -> {
             MyGUI loginPage = new MyGUI();
             loginPage.setVisible(true);
-          dispose();
+            dispose();
         });
         backButton.setBackground(new Color(0,128,255));
         backButton.setForeground(Color.WHITE);
         backButtonPanel.add(backButton);
 
-         // Add header panel and back button panel to NORTH of the frame
-         headerPanel.add(backButtonPanel, BorderLayout.WEST);
-         add(headerPanel, BorderLayout.NORTH);
- 
-         // Search panel with FlowLayout
-         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-         searchPanel.setBackground(Color.PINK); // Set background color to pink
-         
- 
-         // Search field
-         searchField = new JTextField(20);
-         searchField.setToolTipText("Enter title or author to search");
-         searchPanel.add(searchField);
- 
-         // Search button
-         JButton searchButton = new JButton("Search");
-         searchButton.setBackground(new Color(34, 139, 34)); // Dark green
-         searchButton.setForeground(Color.WHITE);
-         searchButton.addActionListener(e -> {
-             String query = searchField.getText().trim().toLowerCase();
-             filterBooks(query);
-         });
- 
-         searchPanel.add(searchButton);
- 
-         // Add search panel to NORTH of the frame
-         headerPanel.add(searchPanel, BorderLayout.EAST);
- 
-         // Initialize table model
-         tableModel = new DefaultTableModel() {
-             @Override
-             public Class<?> getColumnClass(int columnIndex) {
-                 if (columnIndex == 4) {
-                     return Boolean.class;
-                 } else {
-                     return String.class;
-                 }
-             }
- 
-             @Override
-             public boolean isCellEditable(int row, int column) {
-                 return column == 4;
-             }
-         };
+        // Add header panel and back button panel to NORTH of the frame
+        headerPanel.add(backButtonPanel, BorderLayout.WEST);
+        add(headerPanel, BorderLayout.NORTH);
 
+        // Search panel with FlowLayout
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        searchPanel.setBackground(Color.PINK); // Set background color to pink
+
+        // Search field
+        searchField = new JTextField(20);
+        searchField.setToolTipText("Enter title or author to search");
+        searchPanel.add(searchField);
+
+        // Search button
+        JButton searchButton = new JButton("Search");
+        searchButton.setBackground(new Color(34, 139, 34)); // Dark green
+        searchButton.setForeground(Color.WHITE);
+        searchButton.addActionListener(e -> {
+            String query = searchField.getText().trim().toLowerCase();
+            filterBooks(query);
+        });
+
+        searchPanel.add(searchButton);
+
+        // Add search panel to NORTH of the frame
+        headerPanel.add(searchPanel, BorderLayout.EAST);
+
+        // Initialize table model
+        tableModel = new DefaultTableModel() {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 4) {
+                    return Boolean.class;
+                } else {
+                    return String.class;
+                }
+            }
+
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 4;
+            }
+        };
     }
 
-    // Create panel for Users tab
+    /** Create panel for Users tab */
     private void createUsersPanel(JPanel usersPanel) {
         // Create list to display users
         JList<String> userList = new JList<>();
@@ -131,7 +129,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         usersPanel.add(deleteButton, BorderLayout.SOUTH);
     }
 
-    // Load users into the JList
+    /** Load users into the JList */
     private void loadUsers(JList<String> userList) {
         allUsers = new ArrayList<>();
         DefaultListModel<String> model = new DefaultListModel<>();
@@ -149,7 +147,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         userList.setModel(model);
     }
 
-    // Delete selected user
+    /** Delete selected user */
     @SuppressWarnings("unchecked")
     private void deleteUser(String selectedUser) {
         for (String[] user : allUsers) {
@@ -162,7 +160,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         loadUsers((JList<String>) ((JScrollPane) ((JPanel) ((JButton) ((Component) (this)).getParent()).getParent()).getComponent(0)).getViewport().getView());
     }
 
-    // Save users to CSV
+    /** Save users to CSV */
     private void saveUsersToCSV() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.csv"))) {
             for (String[] user : allUsers) {
@@ -173,6 +171,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         }
     }
 
+    /** Create panel for Titles tab */
     private void createTitlesPanel(JPanel titlesPanel) {
         titlesTableModel = new DefaultTableModel(new Object[]{"Title", "Author"}, 0);
         JTable table = new JTable(titlesTableModel);
@@ -182,12 +181,12 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         titlesPanel.add(scrollPane, BorderLayout.CENTER);
 
         loadTitles();
-        JButton deleteButton = new JButton("Delete Selected Titles");
+        JButton deleteButton = new JButton("Delete Selected Books");
         deleteButton.addActionListener(e -> deleteSelectedTitles(table.getSelectedRows()));
         titlesPanel.add(deleteButton, BorderLayout.SOUTH);
     }
 
-    // Method to delete selected titles
+    /** Method to delete selected titles */
     private void deleteSelectedTitles(int[] selectedRows) {
         for (int i = selectedRows.length - 1; i >= 0; i--) {
             int selectedRow = selectedRows[i];
@@ -197,7 +196,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         saveTitlesToCSV(); // Update CSV file with modified data
     }
 
-    // Method to save titles to CSV
+    /** Method to save titles to CSV */
     private void saveTitlesToCSV() {
         String csvFile = "brodsky.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
@@ -211,6 +210,7 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         }
     }
 
+    /** Load titles from CSV file */
     private void loadTitles() {
         allBooks = new ArrayList<>();
         String csvFile = "brodsky.csv";
@@ -232,18 +232,20 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         }
     }
 
+    /** Create panel for User Reviews tab */
     private void createUserReviewsPanel(JPanel reviewsPanel) {
         reviewsTableModel = new DefaultTableModel(new Object[]{"Title", "Author", "Rating", "Reviews"}, 0);
         JTable table = new JTable(reviewsTableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         reviewsPanel.add(scrollPane, BorderLayout.CENTER);
-    
+
         loadReviews();
         JButton deleteButton = new JButton("Delete Selected Reviews");
         deleteButton.addActionListener(e -> deleteSelectedReviews(table.getSelectedRows()));
         reviewsPanel.add(deleteButton, BorderLayout.SOUTH);
     }
-    
+
+    /** Load user reviews from CSV file */
     private void loadReviews() {
         allReviews = new ArrayList<>();
         String csvFile = "General.csv";
@@ -266,8 +268,8 @@ public class GeneralDatabaseOfAdmin extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    // Method to delete selected reviews
+
+    /** Method to delete selected reviews */
     private void deleteSelectedReviews(int[] selectedRows) {
         for (int i = selectedRows.length - 1; i >= 0; i--) {
             int selectedRow = selectedRows[i];
@@ -276,8 +278,8 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         }
         saveReviewsToCSV(); // Update CSV file with modified data
     }
-    
-    // Method to save reviews to CSV
+
+    /** Method to save reviews to CSV */
     private void saveReviewsToCSV() {
         String csvFile = "General.csv";
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
@@ -290,17 +292,13 @@ public class GeneralDatabaseOfAdmin extends JFrame {
                 JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    
 
-
+    /** Main method to launch the application */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(GeneralDatabaseOfAdmin::new);
     }
 
-
-
-    // Filter books based on the search query
+    /** Filter books based on the search query */
     private void filterBooks(String query) {
         if (query.isEmpty()) {
             // Show all books if search query is empty
@@ -322,21 +320,20 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         updateTable(filteredBooks);
     }
 
-    // Show all books in the table
+    /** Show all books in the table */
     private void showAllBooks() {
         updateTable(allBooks);
     }
-    
 
-    // Update the table with the provided list of books
+    /** Update the table with the provided list of books */
     private void updateTable(ArrayList<String[]> books) {
         tableModel.setRowCount(0); // Clear the table
         for (String[] book : books) {
             tableModel.addRow(new Object[]{book[0], book[1], "No rating", "No reviews", false});
         }
-    }    
+    }
 
-     // Custom cell renderer for setting pink background color
+    /** Custom cell renderer for setting pink background color */
     private class CustomRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
