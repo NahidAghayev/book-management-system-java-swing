@@ -1,13 +1,18 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class PersonalDatabase extends JFrame {
     private JTable table;
-    private DefaultTableModel model;
+    private static DefaultTableModel model;
     private JTextField txtTitle, txtAuthor, txtRating, txtReviews, txtUserRating, txtUserReview, txtTimeSpent, txtStartDate, txtEndDate;
     private JComboBox<String> cbStatus;
     private JButton btnAdd, btnUpdate, btnDelete;
@@ -158,7 +163,112 @@ public class PersonalDatabase extends JFrame {
         txtUserRating.setText("");
         txtUserReview.setText("");
     }
+    private void initUI() {
+        model = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                // Make review columns editable directly from the table
+                return column == 8 || column == 9;
+            }
+            
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 8 || columnIndex == 9) {
+                    return JButton.class;
+                }
+                return String.class;
+            }
+        };
 
+        // Define columns
+        String[] columns = new String[]{"Title", "Author", "Rating", "Reviews", "Status", "Time Spent", "Start Date", "End Date", "User Rating", "User Review"};
+        for (String column : columns) {
+            model.addColumn(column);
+        }
+
+        table = new JTable(model);
+        table.setPreferredScrollableViewportSize(new Dimension(950, 300));
+        table.setFillsViewportHeight(true);
+
+        // Adding custom renderers for clickable review buttons
+        table.getColumnModel().getColumn(9).setCellRenderer(new ButtonRenderer());
+        table.getColumnModel().getColumn(9).setCellEditor(new ButtonEditor(new JCheckBox()));
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        add(scrollPane);
+
+        setVisible(true);
+    }
+
+    // Custom button renderer
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            setText((value == null) ? "Click to add" : value.toString());
+            return this;
+        }
+    }
+
+    // Custom button editor for review column
+    class ButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            if (isSelected) {
+                button.setForeground(table.getSelectionForeground());
+                button.setBackground(table.getSelectionBackground());
+            } else {
+                button.setForeground(table.getForeground());
+                button.setBackground(table.getBackground());
+            }
+            label = (value == null) ? "Click to add" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            return button;
+        }
+
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                JOptionPane.showMessageDialog(button, "Open editable review window here");
+                // Logic to open an editable window for review
+            }
+            isPushed = false;
+            return label;
+        }
+    }
+
+    // public static void addBookToPersonalDatabase(String[] bookData) {
+        
+    //     // Add book data to the personalBooks list
+    //     personalBooks.add(bookData);
+    //     // Add row to the table model
+    //     model.addRow(bookData);
+    //     // Save to personal database file
+    //     savePersonalBooks();
+    // }
+
+    // private static void savePersonalBooks() {
+    //     try (BufferedWriter writer = new BufferedWriter(new FileWriter("personal_books.csv", true))) {
+    //         for (String[] bookData : personalBooks) {
+    //             writer.write(String.join(",", bookData));
+    //             writer.newLine();
+    //         }
+    //     } catch (IOException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new PersonalDatabase().setVisible(true));
     }
