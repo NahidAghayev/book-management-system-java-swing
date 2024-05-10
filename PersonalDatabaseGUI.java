@@ -225,7 +225,7 @@ public class PersonalDatabaseGUI extends JFrame {
                     }
                 }
             } catch (ParseException e) {
-                JOptionPane.showMessageDialog(null, "Invalid date format. Please use yyyy-MM-dd format.", "Invalid Date", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Invalid date format. Please use YYYY-MM-DD format.", "Invalid Date", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
             return super.stopCellEditing();

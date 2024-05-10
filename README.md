@@ -6,7 +6,6 @@ This Java Swing application provides a user-friendly interface for managing book
 
 - User registration and authentication
 - Book browsing and searching
-- Borrowing and returning books
 - Admin privileges for managing books and users
 
 ## Dependencies
@@ -15,7 +14,7 @@ This application relies on the following components:
 
 - Java Swing: For creating the graphical user interface.
 - Java I/O: For reading from and writing to files.
-- `User` class: Defines the structure and behavior of user objects.
+- `User` class: Defines the structure and behavior of user and admin objects.
 - `Book` class: Represents a book with attributes such as title, author, and availability status.
 
 ## Class Structure

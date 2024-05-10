@@ -182,7 +182,6 @@ public class GeneralDatabaseGUI extends JFrame {
 
         // Add "Add to Library" button
         JButton addToLibraryButton = new JButton("Add to Personal Library");
-        addToLibraryButton.setBackground(Color.PINK);
         addToLibraryButton.addActionListener(e -> addToLibrary(username));
         add(addToLibraryButton, BorderLayout.SOUTH);
 dispose();
@@ -195,11 +194,11 @@ FilterAndSortFunction.SortSelected(bookTable);
         // Save data to general CSV
         saveDataToGeneralCSV();
     }
+
     /** 
      * Reads data from a CSV file to populate the book table.
      * Handles complexities such as titles enclosed in quotes or titles with embedded commas.
      */
-
     private void readDataFromCSV() {
         allBooks = new ArrayList<>();
         String csvFile = "brodsky.csv";
