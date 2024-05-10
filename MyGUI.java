@@ -6,13 +6,23 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class implements a simple login/registration form GUI.
+ */
 public class MyGUI extends JFrame {
+    /** The path to the CSV database file. */
     private static final String DATABASE_FILE = "users.csv";
+    /** The default admin username. */
     private static final String ADMIN_USERNAME = "admin";
+    /** The default admin password. */
     private static final String ADMIN_PASSWORD = "admin";
 
-    private Map<String, User> usersMap; // Map to store usernames and User objects
+    /** A map to store usernames and User objects. */
+    private Map<String, User> usersMap;
 
+    /**
+     * Constructor to initialize the GUI.
+     */
     public MyGUI() {
         setTitle("Login / Registration Form");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -121,7 +131,7 @@ public class MyGUI extends JFrame {
                     // Check password strength
                     if (!isPasswordStrong(password)) {
                         JOptionPane.showMessageDialog(MyGUI.this,
-                                "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one digit.",
+                                "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.",
                                 "Error", JOptionPane.ERROR_MESSAGE);
                         return;
                     }
@@ -148,6 +158,11 @@ public class MyGUI extends JFrame {
         setLocationRelativeTo(null); // Center the frame on the screen
     }
 
+    /**
+     * Loads user data from the CSV database file.
+     *
+     * @return A map containing username as key and User object as value.
+     */
     private Map<String, User> loadUsersFromCSV() {
         Map<String, User> map = new HashMap<>();
         try (BufferedReader br = new BufferedReader(new FileReader(DATABASE_FILE))) {
@@ -171,6 +186,9 @@ public class MyGUI extends JFrame {
         return map;
     }
 
+    /**
+     * Saves user data to the CSV database file.
+     */
     private void saveUsersToCSV() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(DATABASE_FILE))) {
             // Write usersMap to CSV file
@@ -185,14 +203,26 @@ public class MyGUI extends JFrame {
         }
     }
 
+    /**
+     * Checks if the provided password meets the strength criteria.
+     *
+     * @param password The password to be checked.
+     * @return True if the password is strong, false otherwise.
+     */
     private boolean isPasswordStrong(String password) {
-        // Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one digit
+        // Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character
         return password.length() >= 8 &&
                 password.matches(".*[A-Z].*") &&
                 password.matches(".*[a-z].*") &&
-                password.matches(".*\\d.*");
+                password.matches(".*\\d.*") &&
+                password.matches(".*[^a-zA-Z0-9].*");
     }
 
+    /**
+     * Main method to start the application.
+     *
+     * @param args Command-line arguments.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
