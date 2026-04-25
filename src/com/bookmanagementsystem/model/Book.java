@@ -1,3 +1,5 @@
+package com.bookmanagementsystem.model;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,15 +16,13 @@ public class Book {
         this.reviews = new ArrayList<>();
     }
 
-    // Method to add a rating for the book
     public void addRating(int rating) {
         ratings.add(rating);
     }
 
-    // Method to calculate the average rating of the book
     public double calculateAverageRating() {
         if (ratings.isEmpty()) {
-            return 0; // No rating
+            return 0;
         }
         int sum = 0;
         for (int rating : ratings) {
@@ -31,12 +31,10 @@ public class Book {
         return (double) sum / ratings.size();
     }
 
-    // Method to add a review for the book
     public void addReview(String review) {
         reviews.add(review);
     }
 
-    // Method to generate reviews based on user ratings
     public String generateReviews() {
         if (reviews.isEmpty()) {
             return "No review";
@@ -45,10 +43,9 @@ public class Book {
         for (String review : reviews) {
             sb.append(review).append(", ");
         }
-        return sb.substring(0, sb.length() - 2); // Remove the last comma and space
+        return sb.substring(0, sb.length() - 2);
     }
 
-    // Getters and Setters
     public String getTitle() {
         return title;
     }

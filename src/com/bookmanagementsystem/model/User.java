@@ -1,16 +1,16 @@
+package com.bookmanagementsystem.model;
+
 public class User {
     private String username;
     private String password;
     private boolean isAdmin;
 
-    // Constructor
     public User(String username, String password, boolean isAdmin) {
         this.username = username;
         this.password = password;
         this.isAdmin = isAdmin;
     }
 
-    // Getters and setters
     public String getUsername() {
         return username;
     }
@@ -23,8 +23,6 @@ public class User {
         return password;
     }
 
-    // For security reasons, we won't expose getPassword()
-    // Instead, we can implement a method to verify the password
     public boolean verifyPassword(String password) {
         return this.password.equals(password);
     }

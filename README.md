@@ -2,6 +2,42 @@
 
 This Java Swing application provides a user-friendly interface for managing books in a library or bookstore. Users can register, log in, and access various functionalities such as browsing books, borrowing, and returning books.
 
+## Project Structure
+
+The project has been cleaned up into a more organized folder structure:
+
+```text
+book-management-system-java-swing/
+├── data/                      # CSV data files used by the app
+├── docs/                      # Report and UML diagrams
+├── out/                       # Compiled classes
+├── src/
+│   └── com/bookmanagementsystem/
+│       ├── model/
+│       ├── ui/
+│       └── util/
+├── .gitignore
+├── README.md
+```
+
+- Java source files are now under `src/com/bookmanagementsystem/`
+- CSV files are now under `data/`
+- Documentation assets are now under `docs/`
+
+## Build and Run
+
+Compile the project:
+
+```powershell
+javac -d out (Get-ChildItem -Recurse -Filter *.java | ForEach-Object { $_.FullName })
+```
+
+Run the application:
+
+```powershell
+java -cp out com.bookmanagementsystem.Main
+```
+
 ## Features
 
 - User registration and authentication

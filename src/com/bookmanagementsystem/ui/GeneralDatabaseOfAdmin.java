@@ -1,21 +1,46 @@
-import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.io.*;
+package com.bookmanagementsystem.ui;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 
-/** Main class for the Admin panel managing general database, users, and user reviews */
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JTable;
+import javax.swing.DefaultListModel;
+
+import com.bookmanagementsystem.util.AppPaths;
+
 public class GeneralDatabaseOfAdmin extends JFrame {
+    private static final Path USERS_FILE = AppPaths.dataFile("users.csv");
+    private static final Path BOOKS_FILE = AppPaths.dataFile("copy.csv");
+    private static final Path GENERAL_FILE = AppPaths.dataFile("general.csv");
+
     private DefaultTableModel tableModel;
     private DefaultTableModel titlesTableModel;
     private DefaultTableModel reviewsTableModel;
     private ArrayList<String[]> allBooks;
-    private JTextField searchField;
     private ArrayList<String[]> allUsers;
     private ArrayList<String[]> allReviews;
 
-    /** Constructor to initialize the GUI components */
     public GeneralDatabaseOfAdmin() {
         setTitle("Admin Panel");
         setSize(800, 600);
@@ -30,7 +55,6 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         tabbedPane.addTab("Books", titlesPanel);
         createTitlesPanel(titlesPanel);
 
-        // Users tab
         JPanel usersPanel = new JPanel(new BorderLayout());
         usersPanel.setBackground(Color.PINK);
         tabbedPane.addTab("Users", usersPanel);
@@ -44,52 +68,39 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         add(tabbedPane);
         setVisible(true);
 
-        // Header panel with BorderLayout
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(Color.PINK); // Set background color to pink
+        headerPanel.setBackground(Color.PINK);
 
-        // Header label
         JLabel headerLabel = new JLabel("Book Management System");
         headerLabel.setFont(new Font("Arial", Font.BOLD, 31));
         headerLabel.setForeground(Color.BLACK);
         headerLabel.setHorizontalAlignment(SwingConstants.CENTER);
         headerPanel.add(headerLabel, BorderLayout.CENTER);
 
-        // Back button panel with FlowLayout
         JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        backButtonPanel.setBackground(Color.PINK); // Set background color to pink
+        backButtonPanel.setBackground(Color.PINK);
 
-        // Back button
         JButton backButton = new JButton("Back");
         backButton.addActionListener(e -> {
             MyGUI loginPage = new MyGUI();
             loginPage.setVisible(true);
             dispose();
         });
-        backButton.setBackground(new Color(0,128,255));
+        backButton.setBackground(new Color(0, 128, 255));
         backButton.setForeground(Color.WHITE);
         backButtonPanel.add(backButton);
 
-        // Add header panel and back button panel to NORTH of the frame
         headerPanel.add(backButtonPanel, BorderLayout.WEST);
         add(headerPanel, BorderLayout.NORTH);
 
-        // Search panel with FlowLayout
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        searchPanel.setBackground(Color.PINK); // Set background color to pink
-
-        // Add search panel to NORTH of the frame
+        searchPanel.setBackground(Color.PINK);
         headerPanel.add(searchPanel, BorderLayout.EAST);
 
-        // Initialize table model
         tableModel = new DefaultTableModel() {
             @Override
             public Class<?> getColumnClass(int columnIndex) {
-                if (columnIndex == 4) {
-                    return Boolean.class;
-                } else {
-                    return String.class;
-                }
+                return columnIndex == 4 ? Boolean.class : String.class;
             }
 
             @Override
@@ -99,31 +110,26 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         };
     }
 
-    /** Create panel for Users tab */
     private void createUsersPanel(JPanel usersPanel) {
-        // Create list to display users
         JList<String> userList = new JList<>();
         loadUsers(userList);
         JScrollPane scrollPane = new JScrollPane(userList);
         usersPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Button to delete selected user
         JButton deleteButton = new JButton("Delete Selected User");
-        deleteButton.addActionListener(e -> deleteUser(userList.getSelectedValue()));
+        deleteButton.addActionListener(e -> deleteUser(userList.getSelectedValue(), userList));
         usersPanel.add(deleteButton, BorderLayout.SOUTH);
     }
 
-    /** Load users into the JList */
     private void loadUsers(JList<String> userList) {
         allUsers = new ArrayList<>();
         DefaultListModel<String> model = new DefaultListModel<>();
-        // Load users from CSV file
-        try (BufferedReader br = new BufferedReader(new FileReader("users.csv"))) {
+        try (BufferedReader reader = Files.newBufferedReader(USERS_FILE)) {
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 allUsers.add(data);
-                model.addElement(data[0]); // Add username to the list
+                model.addElement(data[0]);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -131,33 +137,29 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         userList.setModel(model);
     }
 
-    /** Delete selected user */
-    @SuppressWarnings("unchecked")
-    private void deleteUser(String selectedUser) {
-        for (String[] user : allUsers) {
-            if (user[0].equals(selectedUser)) {
-                allUsers.remove(user);
-                break;
-            }
+    private void deleteUser(String selectedUser, JList<String> userList) {
+        if (selectedUser == null) {
+            return;
         }
+
+        allUsers.removeIf(user -> user.length > 0 && user[0].equals(selectedUser));
         saveUsersToCSV();
-        loadUsers((JList<String>) ((JScrollPane) ((JPanel) ((JButton) ((Component) (this)).getParent()).getParent()).getComponent(0)).getViewport().getView());
+        loadUsers(userList);
     }
 
-    /** Save users to CSV */
     private void saveUsersToCSV() {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.csv"))) {
+        try (BufferedWriter writer = Files.newBufferedWriter(USERS_FILE)) {
             for (String[] user : allUsers) {
-                writer.write(String.join(",", user) + "\n");
+                writer.write(String.join(",", user));
+                writer.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    /** Create panel for Titles tab */
     private void createTitlesPanel(JPanel titlesPanel) {
-        titlesTableModel = new DefaultTableModel(new Object[]{"Title", "Author"}, 0);
+        titlesTableModel = new DefaultTableModel(new Object[] { "Title", "Author" }, 0);
         JTable table = new JTable(titlesTableModel);
         table.setDefaultRenderer(Object.class, new CustomRenderer());
 
@@ -170,55 +172,48 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         titlesPanel.add(deleteButton, BorderLayout.SOUTH);
     }
 
-    /** Method to delete selected titles */
     private void deleteSelectedTitles(int[] selectedRows) {
         for (int i = selectedRows.length - 1; i >= 0; i--) {
             int selectedRow = selectedRows[i];
             titlesTableModel.removeRow(selectedRow);
-            allBooks.remove(selectedRow); // Remove corresponding data from the list
+            allBooks.remove(selectedRow);
         }
-        saveTitlesToCSV(); // Update CSV file with modified data
+        saveTitlesToCSV();
     }
 
-    /** Method to save titles to CSV */
     private void saveTitlesToCSV() {
-        String csvFile = "copy.csv";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
+        try (BufferedWriter writer = Files.newBufferedWriter(BOOKS_FILE)) {
             for (String[] book : allBooks) {
-                writer.write(String.join(",", book) + "\n");
+                writer.write(String.join(",", book));
+                writer.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error saving titles to CSV file.", "Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error saving titles to CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /** Load titles from CSV file */
     private void loadTitles() {
         allBooks = new ArrayList<>();
-        String csvFile = "copy.csv";
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+        try (BufferedReader reader = Files.newBufferedReader(BOOKS_FILE)) {
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 if (data.length >= 2) {
                     String title = data[0].trim().isEmpty() ? "Unknown" : data[0].trim();
                     String author = data[1].trim();
-                    allBooks.add(new String[]{title, author});
-                    titlesTableModel.addRow(new Object[]{title, author, false});
+                    allBooks.add(new String[] { title, author });
+                    titlesTableModel.addRow(new Object[] { title, author });
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error loading data from CSV file.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading data from CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /** Create panel for User Reviews tab */
     private void createUserReviewsPanel(JPanel reviewsPanel) {
-        reviewsTableModel = new DefaultTableModel(new Object[]{"Title", "Author", "Rating", "Reviews"}, 0);
+        reviewsTableModel = new DefaultTableModel(new Object[] { "Title", "Author", "Rating", "Reviews" }, 0);
         JTable table = new JTable(reviewsTableModel);
         JScrollPane scrollPane = new JScrollPane(table);
         reviewsPanel.add(scrollPane, BorderLayout.CENTER);
@@ -229,101 +224,70 @@ public class GeneralDatabaseOfAdmin extends JFrame {
         reviewsPanel.add(deleteButton, BorderLayout.SOUTH);
     }
 
-    /** Load user reviews from CSV file */
     private void loadReviews() {
         allReviews = new ArrayList<>();
-        String csvFile = "General.csv";
-        try (BufferedReader br = new BufferedReader(new FileReader(csvFile))) {
+        try (BufferedReader reader = Files.newBufferedReader(GENERAL_FILE)) {
             String line;
-            while ((line = br.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
-                if (data.length >= 5) {
+                if (data.length >= 4) {
                     String title = data[0].trim();
                     String author = data[1].trim();
                     String rating = data[2].trim();
                     String reviews = data[3].trim();
-                    allReviews.add(new String[]{title, author, rating, reviews});
-                    reviewsTableModel.addRow(new Object[]{title, author, rating, reviews});
+                    allReviews.add(new String[] { title, author, rating, reviews });
+                    reviewsTableModel.addRow(new Object[] { title, author, rating, reviews });
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error loading data from CSV file.", "Error",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error loading data from CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /** Method to delete selected reviews */
     private void deleteSelectedReviews(int[] selectedRows) {
         for (int i = selectedRows.length - 1; i >= 0; i--) {
             int selectedRow = selectedRows[i];
             reviewsTableModel.removeRow(selectedRow);
-            allReviews.remove(selectedRow); // Remove corresponding data from the list
+            allReviews.remove(selectedRow);
         }
-        saveReviewsToCSV(); // Update CSV file with modified data
+        saveReviewsToCSV();
     }
 
-    /** Method to save reviews to CSV */
     private void saveReviewsToCSV() {
-        String csvFile = "General.csv";
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(csvFile))) {
+        try (BufferedWriter writer = Files.newBufferedWriter(GENERAL_FILE)) {
             for (String[] review : allReviews) {
-                writer.write(String.join(",", review) + "\n");
+                writer.write(String.join(",", review));
+                writer.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error saving reviews to CSV file.", "Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Error saving reviews to CSV file.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    /** Main method to launch the application */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(GeneralDatabaseOfAdmin::new);
     }
 
-    /** Filter books based on the search query */
-    private void filterBooks(String query) {
-        if (query.isEmpty()) {
-            // Show all books if search query is empty
-            showAllBooks();
-            return;
-        }
-
-        // Filter books based on the search query
-        ArrayList<String[]> filteredBooks = new ArrayList<>();
-        for (String[] book : allBooks) {
-            String title = book[0].toLowerCase();
-            String author = book[1].toLowerCase();
-            if (title.contains(query) || author.contains(query)) {
-                filteredBooks.add(book);
-            }
-        }
-
-        // Update the table with filtered books
-        updateTable(filteredBooks);
-    }
-
-    /** Show all books in the table */
     private void showAllBooks() {
         updateTable(allBooks);
     }
 
-    /** Update the table with the provided list of books */
     private void updateTable(ArrayList<String[]> books) {
-        tableModel.setRowCount(0); // Clear the table
+        tableModel.setRowCount(0);
         for (String[] book : books) {
-            tableModel.addRow(new Object[]{book[0], book[1], "No rating", "No reviews", false});
+            tableModel.addRow(new Object[] { book[0], book[1], "No rating", "No reviews", false });
         }
     }
 
-    /** Custom cell renderer for setting pink background color */
     private class CustomRenderer extends DefaultTableCellRenderer {
         @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            c.setBackground(Color.PINK);
-            return c;
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            component.setBackground(Color.PINK);
+            return component;
         }
     }
 }
